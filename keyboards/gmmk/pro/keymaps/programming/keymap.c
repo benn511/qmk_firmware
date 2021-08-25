@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include QMK_KEYBOARD_H
+#include "rgb_matrix_map.h"
 
 #define _BASE_LAYER 0
 #define _SPACE_LAYER 1
@@ -23,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _COLEMAK_LAYER 4
 
 //Tap Dance Declarations
-enum {
+enum custom_tapdance {
   TD_LEFT_CURLY = 0,
   TD_HOME_DANCE = 1,
   TD_RIGHT_CURLY = 2,
@@ -249,6 +250,37 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 };
 
+void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+
+    if (IS_HOST_LED_ON(led_caps)) {
+        RGB_MATRIX_INDICATOR_SET_COLOR(3, 255, 0, 0); //capslock key
+    }
+    if (IS_HOST_LED_ON(USB_LED_SCROLL_LOCK)) {
+        RGB_MATRIX_INDICATOR_SET_COLOR(67, 0, 255, 0); //side led 01
+        RGB_MATRIX_INDICATOR_SET_COLOR(70, 0, 255, 0); //side led 02
+        RGB_MATRIX_INDICATOR_SET_COLOR(73, 0, 255, 0); //side led 03
+    }
+    if (!IS_HOST_LED_ON(USB_LED_NUM_LOCK)) {   // on if NUM lock is OFF
+    RGB_MATRIX_INDICATOR_SET_COLOR(83, 255, 0, 255); //side led 06
+    RGB_MATRIX_INDICATOR_SET_COLOR(87, 255, 0, 255); //side led 07
+        RGB_MATRIX_INDICATOR_SET_COLOR(91, 255, 0, 255); //side led 08
+    }
+
+       switch(get_highest_layer(layer_state)){  // special handling per layer
+            case 1:  //layer one
+                RGB_MATRIX_INDICATOR_SET_COLOR(0, 255, 0, 255); //esc
+                break;
+            case 2:
+                RGB_MATRIX_INDICATOR_SET_COLOR(0, 255, 0, 255); //esc
+                break;
+            case 3:
+                rgb_matrix_set_color_all(255, 255, 0)
+                break;
+            default:
+                break;
+            break;
+    }
+}
 
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (clockwise) {
@@ -257,4 +289,10 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
       tap_code(KC_VOLD);
     }
     return true;
+}
+
+void keyboard_post_init_user(void) {
+    #ifdef RGB_MATRIX_ENABLE
+        rgb_matrix_set_color_all(RGB_NAUTILUS); // Default startup colour
+    #endif
 }
